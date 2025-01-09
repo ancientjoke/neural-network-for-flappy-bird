@@ -2,7 +2,10 @@
 
 ## Showcase
 
-https://github.com/user-attachments/assets/f4d4df7b-0b50-4077-a6a6-a5f39b0fc53e ``` testing.py ``` showcase
+``` testing.py ``` showcase
+
+https://github.com/user-attachments/assets/c1d2e4c4-4a22-4fb2-8eda-aa9f3f575740
+
 
 ## Installation
 1. Ensure you have Python and pygame installed on your system (Python 3.6 or higher).
