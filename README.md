@@ -4,8 +4,7 @@
 
 ``` training.py ``` showcase
 
-https://github.com/user-attachments/assets/c1d2e4c4-4a22-4fb2-8eda-aa9f3f575740
-
+https://github.com/user-attachments/assets/d2085a19-acc3-4507-8ad5-ee18627b85e8
 
 ## Installation
 1. Ensure you have Python and pygame installed on your system (Python 3.6 or higher).
