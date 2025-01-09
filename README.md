@@ -2,7 +2,7 @@
 
 ## Showcase
 
-``` testing.py ``` showcase
+``` training.py ``` showcase
 
 https://github.com/user-attachments/assets/c1d2e4c4-4a22-4fb2-8eda-aa9f3f575740
 
