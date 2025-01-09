@@ -15,7 +15,7 @@ https://github.com/user-attachments/assets/c1d2e4c4-4a22-4fb2-8eda-aa9f3f575740
 4. Install the required dependencies. It is recommended to set up a virtual environment before installing the dependencies:
         ``` pip install -r requirements.txt ```
 
-## Game Controls
+## Running
 1. To play the game manually, run the `main.py` script:
        ``` python main.py ```
 
