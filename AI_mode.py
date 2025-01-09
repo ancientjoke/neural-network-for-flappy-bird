@@ -2,6 +2,7 @@ import pygame
 import neat
 import os
 import pickle
+import time
 
 from Bird import Bird
 from Pipe import Pipe
@@ -19,7 +20,7 @@ STAT_FONT = pygame.font.SysFont("comicsans", 25)
 GAMEOVER_FONT = pygame.font.SysFont("comicsans", 50)
 
 
-def draw_window(win, bird, pipes, base, score, gameover):
+def draw_window(win, bird, pipes, base, score, gameover, time_alive):
     win.blit(BG_IMG, (0, 0))
 
     for pipe in pipes:
@@ -27,6 +28,9 @@ def draw_window(win, bird, pipes, base, score, gameover):
 
     text = STAT_FONT.render("Score: " + str(score), 1, (255, 255, 255))
     win.blit(text, (WIN_WIDTH - 10 - text.get_width(), 10))
+
+    text = STAT_FONT.render("Time: " + str(round(time_alive/30, 1)), 1, (255, 255, 255))
+    win.blit(text, (10, 10))
 
     base.draw(win)
 
@@ -48,6 +52,7 @@ def main():
     net = neat.nn.FeedForwardNetwork.create(winner, config)
 
     score = 0
+    time_alive = 0
     gameover = False
     bird = Bird(150, 300)
 
@@ -60,6 +65,8 @@ def main():
 
     while run:
         clock.tick(30)
+        time_alive += 1
+        
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 run = False
@@ -89,6 +96,9 @@ def main():
         add_pipe = False
         removed_pipes = []
         for pipe in pipes:
+            if pipe.collide(bird):
+                gameover = True
+            
             if not pipe.passed and pipe.x < bird.x:
                 pipe.passed = True
                 add_pipe = True
@@ -105,9 +115,14 @@ def main():
         for rp in removed_pipes:
             pipes.remove(rp)
 
+        if bird.y + bird.img.get_height() >= 600 or bird.y < 0:
+            gameover = True
+
         base.move()
-        draw_window(win, bird, pipes, base, score, gameover)
+        print(f"\rScore: {score} | Time Alive: {round(time_alive/30, 1)}s", end="")
+        draw_window(win, bird, pipes, base, score, gameover, time_alive)
 
 
 if __name__ == "__main__":
     main()
+    
