@@ -2,7 +2,7 @@ import pygame
 import neat
 import os
 import pickle
-
+import time
 from Bird import Bird
 from Pipe import Pipe
 from Base import Base
@@ -19,8 +19,7 @@ STAT_FONT = pygame.font.SysFont("comicsans", 25)
 GAMEOVER_FONT = pygame.font.SysFont("comicsans", 50)
 GEN = 0
 
-
-def draw_window(win, birds, pipes, base, score, gameover, gen, alive):
+def draw_window(win, birds, pipes, base, score, gameover, gen, alive, max_time):
     win.blit(BG_IMG, (0, 0))
 
     for pipe in pipes:
@@ -34,6 +33,9 @@ def draw_window(win, birds, pipes, base, score, gameover, gen, alive):
 
     text = STAT_FONT.render("Alive: " + str(alive), 1, (255, 255, 255))
     win.blit(text, (10, 50))
+    
+    text = STAT_FONT.render("Time: " + str(round(max_time/30, 1)), 1, (255, 255, 255))
+    win.blit(text, (10, 90))
 
     base.draw(win)
 
@@ -45,7 +47,6 @@ def draw_window(win, birds, pipes, base, score, gameover, gen, alive):
         win.blit(text, (WIN_WIDTH - (WIN_WIDTH / 8) - text.get_width(), WIN_HEIGHT / 2 - 50))
     pygame.display.update()
 
-
 def genome_evaluation(genomes, config):
     global GEN
     GEN += 1
@@ -54,6 +55,8 @@ def genome_evaluation(genomes, config):
     network_list = []
     genome_list = []
     birds = []
+    survival_times = []
+    max_survival_time = 0
 
     for _, g in genomes:
         net = neat.nn.FeedForwardNetwork.create(g, config)
@@ -61,6 +64,7 @@ def genome_evaluation(genomes, config):
         birds.append(Bird(150, 300))
         g.fitness = 0
         genome_list.append(g)
+        survival_times.append(0)
 
     base = Base(600)
     pipes = [Pipe(500)]
@@ -85,12 +89,24 @@ def genome_evaluation(genomes, config):
             break
 
         for x, bird in enumerate(birds):
+            survival_times[x] += 1
+            max_survival_time = max(max(survival_times), max_survival_time)
+            
             bird.move()
             genome_list[x].fitness += 0.1
+            
+            if score < 10:
+                survival_bonus = 0.05 * (1 - score/10)
+                genome_list[x].fitness += survival_bonus
+            
+            optimal_height = WIN_HEIGHT/2
+            height_diff = abs(bird.y - optimal_height)
+            height_fitness = 0.01 * (1 - height_diff/optimal_height)
+            genome_list[x].fitness += height_fitness
 
             output = network_list[x].activate((bird.y,
-                                               abs(bird.y - pipes[pipe_ind].height),
-                                               abs(bird.y - pipes[pipe_ind].bottom)))
+                                           abs(bird.y - pipes[pipe_ind].height),
+                                           abs(bird.y - pipes[pipe_ind].bottom)))
 
             if output[0] > 0.5:
                 bird.jump()
@@ -100,15 +116,20 @@ def genome_evaluation(genomes, config):
         for pipe in pipes:
             for x, bird in enumerate(birds):
                 if pipe.collide(bird):
-                    genome_list[x].fitness -= 1
+                    collision_penalty = 2 if score < 5 else 1
+                    genome_list[x].fitness -= collision_penalty
                     birds.pop(x)
                     network_list.pop(x)
                     genome_list.pop(x)
+                    survival_times.pop(x)
 
                 if bird.y + bird.img.get_height() >= 600 or bird.y < 0:
+                    boundary_penalty = 2 if score < 5 else 1
+                    genome_list[x].fitness -= boundary_penalty
                     birds.pop(x)
                     network_list.pop(x)
                     genome_list.pop(x)
+                    survival_times.pop(x)
 
                 if not pipe.passed and pipe.x < bird.x:
                     pipe.passed = True
@@ -121,8 +142,9 @@ def genome_evaluation(genomes, config):
 
         if add_pipe:
             score += 1
+            pipe_reward = 5 + (score // 10)
             for g in genome_list:
-                g.fitness += 5
+                g.fitness += pipe_reward
             pipes.append(Pipe(450))
 
         for rp in removed_pipes:
@@ -130,9 +152,10 @@ def genome_evaluation(genomes, config):
 
         if score > 100:
             break
+            
         base.move()
-        draw_window(win, birds, pipes, base, score, gameover, GEN, len(birds))
-
+        print(f"\rGeneration: {GEN} | Score: {score} | Alive: {len(birds)} | Time Alive: {round(max_survival_time/30, 1)}s", end="")
+        draw_window(win, birds, pipes, base, score, gameover, GEN, len(birds), max_survival_time)
 
 def run_config(configuration_file_path, save_file_path):
     config = neat.config.Config(neat.DefaultGenome, neat.DefaultReproduction, neat.DefaultSpeciesSet,
@@ -148,7 +171,6 @@ def run_config(configuration_file_path, save_file_path):
 
     with open(save_file_path, 'wb') as f:
         pickle.dump(winner, f)
-
 
 if __name__ == "__main__":
     local_dir = os.path.dirname(__file__)
