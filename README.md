@@ -41,3 +41,7 @@ NEAT (NeuroEvolution of Augmenting Topologies) is a method of evolving artificia
 3. Selection and Reproduction: The best-performing genomes are selected to create the next generation. They undergo mutations and crossover to improve performance.
 4. Iteration: This process repeats for many generations until a bird reaches a score of 100 or more.
 5. Saving the Best Genome: The best-performing genome is saved as winner_genome.pkl and used by AI_mode.py to demonstrate the AI playing the game automatically.
+
+## resources
+- https://realpython.com/python-ai-neural-network/
+- https://vitalab.github.io/article/2017/05/29/geneticNN.html
