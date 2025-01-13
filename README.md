@@ -1,7 +1,5 @@
 # Neural network for flappy-bird game using python
 
-## Showcase
-
 ``` training.py ``` showcase
 
 https://github.com/user-attachments/assets/d2085a19-acc3-4507-8ad5-ee18627b85e8
